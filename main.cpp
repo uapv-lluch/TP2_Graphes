@@ -1,34 +1,64 @@
 #include <iostream>
 #include <vector>
+#include <list>
 
 using namespace std;
 
-unsigned n = 8;
+const unsigned n = 8;
 
-void MooreDijkstra(unsigned c) {
-    unsigned C[n];
-    C[0] = 0;
+list<unsigned> mooreDijkstra(int c[n][n]) {
+    list<unsigned> C;
+    list<unsigned> Cbarre;
+    for (unsigned i = 0; i < n; ++i) {
+        Cbarre.push_back(i);
+    }
+    C.push_back(0);
+    Cbarre.remove(0);
     unsigned d[n];
     unsigned pere[n];
-    for (unsigned i = 0 ; i < n ; ++i) {
+    for (unsigned i = 0; i < n; ++i) {
         pere[i] = 0;
     }
-    for (unsigned j = 0 ; j < n ; ++j) {
-        d[j] = 99999;
+    for (unsigned i = 0; i < n; ++i) {
+        d[i] = 99999;
     }
-    unsigned j = 1;
-    for (unsigned l = 1 ; l < n ; ++l) {
-        
-    }
-}
+    d[0] = 0;
+    unsigned j = 0;
+    for (unsigned l = 1; l < n; ++l) {
+        for (list<unsigned>::iterator it = Cbarre.begin(); it != Cbarre.end(); ++it) {
+            if (d[j] + c[j][*it] < d[*it]) {
+                d[*it] = d[j] + c[j][*it];
+                pere[*it] = j;
+            }
+        }
 
+        // Argmin
+        unsigned min = 99999;
+        for (list<unsigned>::iterator it = Cbarre.begin(); it != Cbarre.end(); ++it) {
+            if (d[*it] < min) {
+                min = d[*it];
+                j = *it;
+            }
+        }
+
+        C.push_back(j);
+        Cbarre.remove(j);
+
+
+
+    }
+    for (unsigned i = 0; i < n; ++i) {
+        cout << i << ": " << d[i] << endl;
+    }
+    return C;
+}
 
 int main() {
 
     // Matrice représentative du graphe
-    unsigned c[n][n];
-    for (unsigned i=0; i < n; ++i){
-        for(unsigned j=0; j < n; ++j){
+    int c[n][n];
+    for (unsigned i = 0; i < n; ++i) {
+        for (unsigned j = 0; j < n; ++j) {
             c[i][j] = 0;
         }
     }
@@ -44,6 +74,9 @@ int main() {
     c[5][6] = 2;
     c[6][7] = 2;
 
-    MooreDijkstra(c);
+    list<unsigned> C = mooreDijkstra(c);
+    /*for (auto it = C.begin(); it != C.end(); ++it) {
+        cout << *it << endl;
+    }*/
     return 0;
 }
