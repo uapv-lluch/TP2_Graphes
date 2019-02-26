@@ -8,14 +8,14 @@ const unsigned n = 8;
 unsigned c[n][n];
 
 
-vector<int> mooreDijkstra(unsigned c[n][n]) {
+vector<int> mooreDijkstra(unsigned s) {
     vector<unsigned> C;
     list<unsigned> Cbarre;
     for (unsigned i = 0; i < n; ++i) {
         Cbarre.push_back(i);
     }
-    C.push_back(0);
-    Cbarre.remove(0);
+    C.push_back(s);
+    Cbarre.remove(s);
     vector<unsigned> d(n);
     vector<int> pere(n);
     for (unsigned i = 0; i < n; ++i) {
@@ -24,8 +24,8 @@ vector<int> mooreDijkstra(unsigned c[n][n]) {
     for (unsigned i = 0; i < n; ++i) {
         d[i] = 99999;
     }
-    d[0] = 0;
-    unsigned j = 0;
+    d[s] = 0;
+    unsigned j = s;
     for (unsigned l = 1; l < n; ++l) {
         for (list<unsigned>::iterator it = Cbarre.begin(); it != Cbarre.end(); ++it) {
             if (c[j][*it] != 0) {
@@ -35,7 +35,6 @@ vector<int> mooreDijkstra(unsigned c[n][n]) {
                 }
             }
         }
-
         // Argmin
         unsigned min = 99999;
         for (list<unsigned>::iterator it = Cbarre.begin(); it != Cbarre.end(); ++it) {
@@ -44,7 +43,6 @@ vector<int> mooreDijkstra(unsigned c[n][n]) {
                 j = *it;
             }
         }
-
         C.push_back(j);
         Cbarre.remove(j);
 
@@ -58,14 +56,49 @@ vector<int> mooreDijkstra(unsigned c[n][n]) {
 }
 
 
+vector<int> bellman(unsigned s) {
+    int k = 0;
+    vector<vector<unsigned>> d(n+1, vector<unsigned>(n));
+    for (unsigned i = 0; i < d[0].size(); ++i) {
+        d[0][i] = 99999;
+    }
+    d[0][s] = 0;
+    vector<int> pere(n);
+    for (vector<int>::iterator it = pere.begin(); it != pere.end(); ++it) {
+        *it = -1;
+    }
+    bool stop = false;
+    while (k < n && !stop) {
+        for (unsigned i = 1; i < n; ++i) {
+            d[k+1][i] = d[k][i];
+            for (unsigned j = 0; j < n; ++j) {
+                if (c[j][i] != 0) {
+                    if (d[k][j] + c[j][i] < d[k+1][i]) {
+                        d[k+1][i] = d[k][j] + c[j][i];
+                        pere[i] = j;
+                    }
+                }
+            }
+        }
+        ++k;
+        /*for (unsigned i = 0; i < n; ++i) {
+            if (d[k][i] == d[k-1][i]) {
+                stop = true;
+            }
+        }*/
+    }
+    return pere;
+}
+
+
 void displayShortestPath(vector<int> pere) {
     for (unsigned i = 0; i < pere.size(); ++i) {
         int pereActuel = pere[i];
-        int pereDePereActuel = i;
+        int filsActuel = i;
         int chemin = 0;
         while (pereActuel != -1) {
-            chemin += c[pereActuel][pereDePereActuel];
-            pereDePereActuel = pereActuel;
+            chemin += c[pereActuel][filsActuel];
+            filsActuel = pereActuel;
             pereActuel = pere[pereActuel];
         }
         cout << i << " : " << chemin << endl;
@@ -93,11 +126,24 @@ int main() {
     c[5][6] = 2;
     c[6][7] = 2;
 
-    vector<int> pere = mooreDijkstra(c);
-    /*for (auto it = pere.begin(); it != pere.end(); ++it) {
-        cout << *it << endl;
-    }*/
+    c[1][0] = 2;
+    c[3][0] = 6;
+    c[4][1] = 7;
+    c[2][1] = 2;
+    c[5][2] = 2;
+    c[3][2] = 1;
+    c[6][3] = 4;
+    c[5][4] = 3;
+    c[7][4] = 3;
+    c[6][5] = 2;
+    c[7][6] = 2;
 
+    cout << endl << "Dijkstra" << endl;
+    vector<int> pere = mooreDijkstra(0);
+    displayShortestPath(pere);
+
+    cout << endl << "Bellman" << endl;
+    pere = bellman(0);
     displayShortestPath(pere);
     return 0;
 }
