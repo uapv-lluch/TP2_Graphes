@@ -26,7 +26,7 @@ void display(vector<int> & v)
 // Soient i et j deux indices contenus dans le tas. i "<" j ssi d[i] < d[j].
 bool cmp(const int & i, const int & j)
 {
-	return(d[i] < d[j]); 
+	return(d[i] < d[j]);
 }
 
 

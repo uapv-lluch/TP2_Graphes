@@ -1,33 +1,48 @@
 #include <iostream>
 #include <vector>
 #include <list>
+#include <algorithm>
 
 using namespace std;
 
-const unsigned n = 8;
-unsigned c[n][n];
+const int n = 8;
+int c[n][n];
+vector<int> d;
 
+void display(vector<int> & v)
+{
+    int n = v.size();
 
-vector<int> mooreDijkstra(unsigned s) {
-    vector<unsigned> C;
-    list<unsigned> Cbarre;
-    for (unsigned i = 0; i < n; ++i) {
+    for(int i = 0; i < (n-1); i++)
+        cout << v[i] << " ; ";
+
+    cout << v[n-1] << endl;
+}
+
+bool cmp(const int & i, const int & j) {
+    return(d[i] < d[j]);
+}
+
+vector<int> mooreDijkstra(int s) {
+    vector<int> C;
+    list<int> Cbarre;
+    for (int i = 0; i < n; ++i) {
         Cbarre.push_back(i);
     }
     C.push_back(s);
     Cbarre.remove(s);
-    vector<unsigned> d(n);
+    vector<int> d(n);
     vector<int> pere(n);
-    for (unsigned i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         pere[i] = -1;
     }
-    for (unsigned i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         d[i] = 99999;
     }
     d[s] = 0;
-    unsigned j = s;
-    for (unsigned l = 1; l < n; ++l) {
-        for (list<unsigned>::iterator it = Cbarre.begin(); it != Cbarre.end(); ++it) {
+    int j = s;
+    for (int l = 1; l < n; ++l) {
+        for (list<int>::iterator it = Cbarre.begin(); it != Cbarre.end(); ++it) {
             if (c[j][*it] != 0) {
                 if (d[j] + c[j][*it] < d[*it]) {
                     d[*it] = d[j] + c[j][*it];
@@ -36,8 +51,8 @@ vector<int> mooreDijkstra(unsigned s) {
             }
         }
         // Argmin
-        unsigned min = 99999;
-        for (list<unsigned>::iterator it = Cbarre.begin(); it != Cbarre.end(); ++it) {
+        int min = 99999;
+        for (list<int>::iterator it = Cbarre.begin(); it != Cbarre.end(); ++it) {
             if (d[*it] < min) {
                 min = d[*it];
                 j = *it;
@@ -45,21 +60,79 @@ vector<int> mooreDijkstra(unsigned s) {
         }
         C.push_back(j);
         Cbarre.remove(j);
-
-
-
     }
-    /*for (unsigned i = 0; i < n; ++i) {
+    /*for (int i = 0; i < n; ++i) {
+        cout << i << ": " << d[i] << endl;
+    }*/
+    return pere;
+}
+
+vector<int> mooreDijkstas(int s) {
+//    vector<int> C;
+//    list<int> Cbarre;
+    /*for (int i = 0; i < n; ++i) {
+        Cbarre.push_back(i);
+    }*/
+//    C.push_back(s);
+//    Cbarre.remove(s);
+//    vector<int> d(n);
+
+
+    d.resize(n);
+    vector<int> pere(n);
+    vector<int> T;
+    for (int i = 0; i < n; ++i) {
+        pere[i] = -1;
+        d[i] = 99999;
+    }
+    d[s] = 0;
+    for (int i = 0; i < n ; ++i) {
+        T.push_back(i);
+    }
+    make_heap(T.begin(), T.end(), cmp);
+    int j = s;
+    for (int l = 1; l < n; ++l) {
+        for (vector<int>::iterator it = T.begin(); it != T.end(); ++it) {
+            if (c[j][*it] != 0) {
+                if (d[j] + c[j][*it] < d[*it]) {
+                    d[*it] = d[j] + c[j][*it];
+                    pere[*it] = j;
+                }
+            }
+        }
+        sort_heap(T.begin(), T.end(), cmp);
+
+        pop_heap(T.begin(), T.end(), cmp);
+
+        j = T.back();
+
+        T.pop_back();
+
+
+
+        /*int min = 99999;
+        for (list<int>::iterator it = Cbarre.begin(); it != Cbarre.end(); ++it) {
+            if (d[*it] < min) {
+                min = d[*it];
+                j = *it;
+            }
+        }
+
+
+        C.push_back(j);
+        Cbarre.remove(j);*/
+    }
+    /*for (int i = 0; i < n; ++i) {
         cout << i << ": " << d[i] << endl;
     }*/
     return pere;
 }
 
 
-vector<int> bellman(unsigned s) {
+vector<int> bellman(int s) {
     int k = 0;
-    vector<vector<unsigned>> d(n+1, vector<unsigned>(n));
-    for (unsigned i = 0; i < d[0].size(); ++i) {
+    vector<vector<int>> d(n+1, vector<int>(n));
+    for (int i = 0; i < d[0].size(); ++i) {
         d[0][i] = 99999;
     }
     d[0][s] = 0;
@@ -69,9 +142,9 @@ vector<int> bellman(unsigned s) {
     }
     bool stop = false;
     while (k < n && !stop) {
-        for (unsigned i = 1; i < n; ++i) {
+        for (int i = 1; i < n; ++i) {
             d[k+1][i] = d[k][i];
-            for (unsigned j = 0; j < n; ++j) {
+            for (int j = 0; j < n; ++j) {
                 if (c[j][i] != 0) {
                     if (d[k][j] + c[j][i] < d[k+1][i]) {
                         d[k+1][i] = d[k][j] + c[j][i];
@@ -81,18 +154,19 @@ vector<int> bellman(unsigned s) {
             }
         }
         ++k;
-        /*for (unsigned i = 0; i < n; ++i) {
-            if (d[k][i] == d[k-1][i]) {
-                stop = true;
+        stop = true;
+        for (int i = 0; i < n; ++i) {
+            if (d[k][i] != d[k-1][i]) {
+                stop = false;
             }
-        }*/
+        }
     }
     return pere;
 }
 
 
 void displayShortestPath(vector<int> pere) {
-    for (unsigned i = 0; i < pere.size(); ++i) {
+    for (int i = 0; i < pere.size(); ++i) {
         int pereActuel = pere[i];
         int filsActuel = i;
         int chemin = 0;
@@ -109,8 +183,8 @@ void displayShortestPath(vector<int> pere) {
 int main() {
 
     // Matrice représentative du graphe
-    for (unsigned i = 0; i < n; ++i) {
-        for (unsigned j = 0; j < n; ++j) {
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
             c[i][j] = 0;
         }
     }
@@ -138,8 +212,14 @@ int main() {
     c[6][5] = 2;
     c[7][6] = 2;
 
+    vector<int> pere;
+
     cout << endl << "Dijkstra" << endl;
-    vector<int> pere = mooreDijkstra(0);
+    pere = mooreDijkstra(0);
+    displayShortestPath(pere);
+
+    cout << endl << "Dijkstra (tas)" << endl;
+    pere = mooreDijkstas(0);
     displayShortestPath(pere);
 
     cout << endl << "Bellman" << endl;
