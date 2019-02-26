@@ -5,19 +5,21 @@
 using namespace std;
 
 const unsigned n = 8;
+unsigned c[n][n];
 
-list<unsigned> mooreDijkstra(int c[n][n]) {
-    list<unsigned> C;
+
+vector<int> mooreDijkstra(unsigned c[n][n]) {
+    vector<unsigned> C;
     list<unsigned> Cbarre;
     for (unsigned i = 0; i < n; ++i) {
         Cbarre.push_back(i);
     }
     C.push_back(0);
     Cbarre.remove(0);
-    unsigned d[n];
-    unsigned pere[n];
+    vector<unsigned> d(n);
+    vector<int> pere(n);
     for (unsigned i = 0; i < n; ++i) {
-        pere[i] = 0;
+        pere[i] = -1;
     }
     for (unsigned i = 0; i < n; ++i) {
         d[i] = 99999;
@@ -26,9 +28,11 @@ list<unsigned> mooreDijkstra(int c[n][n]) {
     unsigned j = 0;
     for (unsigned l = 1; l < n; ++l) {
         for (list<unsigned>::iterator it = Cbarre.begin(); it != Cbarre.end(); ++it) {
-            if (d[j] + c[j][*it] < d[*it]) {
-                d[*it] = d[j] + c[j][*it];
-                pere[*it] = j;
+            if (c[j][*it] != 0) {
+                if (d[j] + c[j][*it] < d[*it]) {
+                    d[*it] = d[j] + c[j][*it];
+                    pere[*it] = j;
+                }
             }
         }
 
@@ -47,16 +51,31 @@ list<unsigned> mooreDijkstra(int c[n][n]) {
 
 
     }
-    for (unsigned i = 0; i < n; ++i) {
+    /*for (unsigned i = 0; i < n; ++i) {
         cout << i << ": " << d[i] << endl;
-    }
-    return C;
+    }*/
+    return pere;
 }
+
+
+void displayShortestPath(vector<int> pere) {
+    for (unsigned i = 0; i < pere.size(); ++i) {
+        int pereActuel = pere[i];
+        int pereDePereActuel = i;
+        int chemin = 0;
+        while (pereActuel != -1) {
+            chemin += c[pereActuel][pereDePereActuel];
+            pereDePereActuel = pereActuel;
+            pereActuel = pere[pereActuel];
+        }
+        cout << i << " : " << chemin << endl;
+    }
+}
+
 
 int main() {
 
     // Matrice représentative du graphe
-    int c[n][n];
     for (unsigned i = 0; i < n; ++i) {
         for (unsigned j = 0; j < n; ++j) {
             c[i][j] = 0;
@@ -74,9 +93,11 @@ int main() {
     c[5][6] = 2;
     c[6][7] = 2;
 
-    list<unsigned> C = mooreDijkstra(c);
-    /*for (auto it = C.begin(); it != C.end(); ++it) {
+    vector<int> pere = mooreDijkstra(c);
+    /*for (auto it = pere.begin(); it != pere.end(); ++it) {
         cout << *it << endl;
     }*/
+
+    displayShortestPath(pere);
     return 0;
 }
