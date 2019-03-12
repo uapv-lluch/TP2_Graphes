@@ -2,12 +2,33 @@
 #include <vector>
 #include <list>
 #include <algorithm>
+#include <fstream>
 
 using namespace std;
 
 const int n = 8;
-int c[n][n];
+int cOld[n][n];
 vector<int> d;
+
+struct arc {
+    int noeud;
+    int val;
+};
+
+vector<string> split(string str, char delimiter) {
+    vector <string> result;
+    size_t begin = 0;
+    size_t index = str.find(delimiter);
+    while (index != string::npos) {
+        string sub = str.substr(begin, index-begin);
+        result.push_back(sub);
+        begin = index+1;
+        index = str.find(delimiter, begin);
+    }
+    string sub = str.substr(begin, str.find('\n')-begin);
+    result.push_back(sub);
+    return result;
+}
 
 void display(vector<int> & v)
 {
@@ -23,7 +44,7 @@ bool cmp(const int & i, const int & j) {
     return(d[i] < d[j]);
 }
 
-vector<int> mooreDijkstra(int s) {
+vector<int> mooreDijkstra(int s, vector<vector<int>> c) {
     vector<int> C;
     list<int> Cbarre;
     for (int i = 0; i < n; ++i) {
@@ -67,7 +88,7 @@ vector<int> mooreDijkstra(int s) {
     return pere;
 }
 
-vector<int> mooreDijkstas(int s) {
+vector<int> mooreDijkstas(int s, vector<vector<int>> c) {
 //    vector<int> C;
 //    list<int> Cbarre;
     /*for (int i = 0; i < n; ++i) {
@@ -129,7 +150,7 @@ vector<int> mooreDijkstas(int s) {
 }
 
 
-vector<int> bellman(int s) {
+vector<int> bellman(int s, vector<vector<int>> c) {
     int k = 0;
     vector<vector<int>> d(n+1, vector<int>(n));
     for (int i = 0; i < d[0].size(); ++i) {
@@ -165,7 +186,7 @@ vector<int> bellman(int s) {
 }
 
 
-void displayShortestPath(vector<int> pere) {
+void displayShortestPath(vector<int> pere, vector<vector<int>> c) {
     for (int i = 0; i < pere.size(); ++i) {
         int pereActuel = pere[i];
         int filsActuel = i;
@@ -180,7 +201,32 @@ void displayShortestPath(vector<int> pere) {
 }
 
 
+
+vector<list<arc>> makeList() {
+    vector<list<arc>> T;
+    ifstream file("../resources/USA-road-d.NY.gr", ios::in);
+    if (file) {
+        string line;
+        while (getline(file, line)) {
+            vector <string> splited = split(line, ' ');
+            if (splited[0] == "p") {
+                T.resize(stoul(splited[2]));
+
+            } else if (splited[0] == "a") {
+                arc a = {stoi(splited[2]), stoi(splited[3])};
+                T[stoi(splited[1])-1].push_back(a);
+            }
+        }
+    } else {
+        cerr << "Error file";
+    }
+    return T;
+}
+
+
 int main() {
+
+    vector<vector<int>> c(n, vector<int>(n));
 
     // Matrice représentative du graphe
     for (int i = 0; i < n; ++i) {
@@ -212,18 +258,20 @@ int main() {
     c[6][5] = 2;
     c[7][6] = 2;
 
+    vector<list<arc>> arcs = makeList();
+
     vector<int> pere;
 
     cout << endl << "Dijkstra" << endl;
-    pere = mooreDijkstra(0);
-    displayShortestPath(pere);
+    pere = mooreDijkstra(0, c);
+    displayShortestPath(pere, c);
 
     cout << endl << "Dijkstra (tas)" << endl;
-    pere = mooreDijkstas(0);
-    displayShortestPath(pere);
+    pere = mooreDijkstas(0, c);
+    displayShortestPath(pere, c);
 
     cout << endl << "Bellman" << endl;
-    pere = bellman(0);
-    displayShortestPath(pere);
+    pere = bellman(0, c);
+    displayShortestPath(pere, c);
     return 0;
 }
